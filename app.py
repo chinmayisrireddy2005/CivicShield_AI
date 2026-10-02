@@ -17,8 +17,14 @@ from services.routing_service import get_route_info
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent
-DATABASE_PATH = BASE_DIR / "database" / "civicshield.db"
+
+# Render/Linux-safe SQLite paths
+DATABASE_DIR = BASE_DIR / "database"
+DATABASE_DIR.mkdir(parents=True, exist_ok=True)
+
+DATABASE_PATH = DATABASE_DIR / "civicshield.db"
 INCIDENT_PHOTO_DIR = BASE_DIR / "static" / "incident_photos"
+INCIDENT_PHOTO_DIR.mkdir(parents=True, exist_ok=True)
 MAX_INCIDENT_PHOTO_SIZE = 8 * 1024 * 1024
 MAX_VOICE_AUDIO_SIZE = 4 * 1024 * 1024
 VOICE_LANGUAGES = {
@@ -40,7 +46,9 @@ app.config["MAX_CONTENT_LENGTH"] = MAX_INCIDENT_PHOTO_SIZE + 1024 * 1024
 
 
 def get_db():
-    conn = sqlite3.connect(DATABASE_PATH)
+    # Make sure the database directory exists before SQLite opens the file.
+    DATABASE_DIR.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(str(DATABASE_PATH))
     conn.row_factory = sqlite3.Row
     return conn
 
