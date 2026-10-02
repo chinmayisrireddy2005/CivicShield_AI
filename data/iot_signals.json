@@ -1,0 +1,46 @@
+{
+  "fire": {
+    "type": "FIRE",
+    "title": "Simulated Fire Sensor",
+    "description": "Fire reported near a crowded commercial area.",
+    "city": "Vijayawada",
+    "state": "Andhra Pradesh",
+    "landmark": "Benz Circle",
+    "latitude": 16.5074,
+    "longitude": 80.648,
+    "severity": "High"
+  },
+  "flood": {
+    "type": "FLOOD",
+    "title": "Simulated Flood Sensor",
+    "description": "Floodwater is accumulating near a residential lane and roads are becoming blocked.",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "landmark": "Madhapur",
+    "latitude": 17.4401,
+    "longitude": 78.3911,
+    "severity": "Moderate"
+  },
+  "accident": {
+    "type": "ROAD_ACCIDENT",
+    "title": "Simulated Accident Sensor",
+    "description": "A serious road accident has occurred near a busy intersection with visible traffic disruption.",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "landmark": "Koramangala",
+    "latitude": 12.9352,
+    "longitude": 77.6245,
+    "severity": "High"
+  },
+  "other": {
+    "type": "OTHER_EMERGENCY",
+    "title": "Simulated General Emergency",
+    "description": "A structure is reported unstable and residents are evacuated from the area.",
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "landmark": "Anna Nagar",
+    "latitude": 13.088,
+    "longitude": 80.2095,
+    "severity": "Moderate"
+  }
+}

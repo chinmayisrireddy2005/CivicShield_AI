@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% block title %}Report Emergency | CivicShield AI{% endblock %}
+{% block content %}
+<main class="page-content">
+    <section class="page-head">
+        <div>
+            <p class="eyebrow">Emergency Response</p>
+            <h1>Report Emergency</h1>
+        </div>
+    </section>
+
+    <form method="post" enctype="multipart/form-data" action="{{ url_for('create_incident') }}" class="report-form" id="report-form">
+        <div class="wizard-steps">
+            <span class="wizard-step active">01 Incident</span>
+            <span class="wizard-step">02 Report</span>
+            <span class="wizard-step">03 Location</span>
+            <span class="wizard-step">04 Severity</span>
+            <span class="wizard-step">05 Review</span>
+        </div>
+
+        <div class="step-panel active" data-step="incident">
+            <h3>Incident Type</h3>
+            <div class="option-grid">
+                <label class="option-card"><input type="radio" name="emergency_type" value="FIRE" checked /> <span>🔥 Fire</span></label>
+                <label class="option-card"><input type="radio" name="emergency_type" value="ROAD_ACCIDENT" /> <span>🚗 Road Accident</span></label>
+                <label class="option-card"><input type="radio" name="emergency_type" value="FLOOD" /> <span>🌊 Flood</span></label>
+                <label class="option-card"><input type="radio" name="emergency_type" value="OTHER_EMERGENCY" /> <span>⚠️ Other Emergency</span></label>
+            </div>
+        </div>
+
+        <div class="step-panel" data-step="report">
+            <h3>Report Details</h3>
+            <div class="voice-studio" id="voice-studio">
+                <div class="voice-studio-copy">
+                    <span class="voice-kicker">Hands-free report</span>
+                    <span class="voice-status ready" id="voice-status-pill" role="status" aria-live="polite">Ready when you are</span>
+                    <p id="voice-feedback" class="voice-feedback">Choose a language, start speaking, then press Stop to transcribe your report.</p>
+                </div>
+                <div class="voice-orbit" aria-hidden="true">
+                    <span class="voice-orbit-ring"></span>
+                    <span class="voice-orbit-core">🎙️</span>
+                    <span class="voice-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                </div>
+                <div class="voice-tools">
+                    <label class="voice-language-label" for="voice-language">Speak in
+                        <select id="voice-language" aria-label="Select voice language">
+                            <option value="en-US">English</option>
+                            <option value="te-IN">Telugu</option>
+                            <option value="hi-IN">Hindi</option>
+                            <option value="ta-IN">Tamil</option>
+                            <option value="kn-IN">Kannada</option>
+                        </select>
+                    </label>
+                    <button type="button" class="primary-btn voice-start" id="start-recording">Start speaking</button>
+                    <button type="button" class="secondary-btn voice-stop" id="stop-recording" disabled>Stop</button>
+                </div>
+                <p class="voice-feedback">When you press Stop, the recording is sent to Google Gemini for transcription in your selected language. Do not include information you do not want to send to Google.</p>
+                <p id="voice-fallback" class="voice-fallback hidden" role="alert"></p>
+            </div>
+            <textarea name="description" id="incident-description" rows="7" placeholder="Describe what happened..." required></textarea>
+            <div class="inline-fields">
+                <label>
+                    People affected
+                    <input type="number" name="people_affected" min="0" placeholder="Optional" />
+                </label>
+                <label>
+                    Additional information
+                    <input type="text" name="additional_info" placeholder="Optional" />
+                </label>
+            </div>
+            <section class="photo-upload-panel" aria-labelledby="incident-photo-title">
+                <h4 id="incident-photo-title">Emergency photo <span>(optional)</span></h4>
+                <p>Upload an existing photo or take one with your camera. JPEG, PNG, or WebP, up to 8 MB.</p>
+                <div class="photo-actions">
+                    <label class="secondary-btn photo-select-btn" for="incident-photo" tabindex="0">Choose photo</label>
+                    <input id="incident-photo" class="photo-input" type="file" name="incident_photo" accept="image/jpeg,image/png,image/webp" />
+                    <button type="button" class="secondary-btn" id="open-camera">Take photo</button>
+                </div>
+                <div id="camera-panel" class="camera-panel hidden">
+                    <video id="camera-preview" autoplay playsinline muted></video>
+                    <div class="photo-actions">
+                        <button type="button" class="primary-btn" id="capture-photo">Capture photo</button>
+                        <button type="button" class="secondary-btn" id="close-camera">Cancel camera</button>
+                    </div>
+                </div>
+                <img id="incident-photo-preview" class="incident-photo-preview hidden" alt="Selected emergency photo preview" />
+                <p id="incident-photo-status" class="photo-status" role="status" aria-live="polite">No photo selected.</p>
+            </section>
+        </div>
+
+        <div class="step-panel" data-step="location">
+            <h3>Location</h3>
+            <div class="location-actions">
+                <button type="button" class="secondary-btn" id="use-current-location">Use current location</button>
+                <input type="text" id="location-search" placeholder="Search a place, district, city, or landmark" />
+                <button type="button" class="secondary-btn" id="search-location-btn">Search</button>
+            </div>
+            <div id="location-suggestions" class="location-suggestions" aria-live="polite"></div>
+            <div class="inline-fields">
+                <label>
+                    State
+                    <input type="text" name="state" id="state-input" placeholder="State" />
+                </label>
+                <label>
+                    City
+                    <input type="text" name="city" id="city-input" placeholder="City" />
+                </label>
+            </div>
+            <label>
+                Place / Landmark
+                <input type="text" name="address" id="address-input" placeholder="Place / Landmark" />
+            </label>
+            <input type="hidden" name="latitude" id="latitude-input" />
+            <input type="hidden" name="longitude" id="longitude-input" />
+            <div id="location-preview-map" class="mini-map"></div>
+        </div>
+
+        <div class="step-panel" data-step="severity">
+            <h3>Severity</h3>
+            <div class="severity-box" id="severity-box">
+                <label><input type="radio" name="severity" value="Low" /> Low</label>
+                <label><input type="radio" name="severity" value="Moderate" checked /> Moderate</label>
+                <label><input type="radio" name="severity" value="High" /> High</label>
+                <label><input type="radio" name="severity" value="Critical" /> Critical</label>
+            </div>
+            <p class="flood-note hidden" id="flood-severity-note">AI-estimated severity — requires human verification.</p>
+        </div>
+
+        <div class="step-panel" data-step="review">
+            <h3>Review</h3>
+            <div class="review-summary" id="review-summary"></div>
+        </div>
+
+        <div class="form-navigation">
+            <button type="button" class="secondary-btn" id="prev-step">Previous</button>
+            <button type="button" class="primary-btn" id="next-step">Next</button>
+            <button type="submit" class="primary-btn hidden" id="submit-report">Submit Emergency</button>
+        </div>
+    </form>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/voice.js') }}"></script>
+<script>
+    window.CIVICSHIELD = window.CIVICSHIELD || {};
+    window.CIVICSHIELD.reportUrl = '{{ url_for("api_geocode") }}';
+</script>
+{% endblock %}

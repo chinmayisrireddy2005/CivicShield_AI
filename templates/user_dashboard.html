@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}User Dashboard | CivicShield AI{% endblock %}
+{% block content %}
+<main class="page-content">
+    <section class="page-head">
+        <div>
+            <p class="eyebrow">Operator Panel</p>
+            <h1>Welcome, {{ user_name }}</h1>
+        </div>
+    </section>
+
+    <section class="stats-grid">
+        <div class="stat-card accent-red"><span>Active Incidents</span><strong>{{ active_incidents }}</strong></div>
+        <div class="stat-card"><span>Resolved Incidents</span><strong>{{ resolved_incidents }}</strong></div>
+        <div class="stat-card"><span>Total Reports</span><strong>{{ total_reports }}</strong></div>
+    </section>
+
+    <section class="dashboard-panels">
+        <div class="panel-grid">
+            <div class="panel-card">
+                <h3>My Active Incidents</h3>
+                {% if incidents %}
+                    <div class="incident-list">
+                        {% for incident in incidents %}
+                            <a href="{{ url_for('dashboard', incident_id=incident['id']) }}" class="incident-row">
+                                <div>
+                                    <strong>{{ incident['id'] }}</strong>
+                                    <p>{{ incident['emergency_type'] }} · {{ incident['city'] }}</p>
+                                </div>
+                                <span class="status-badge {{ incident['status'].lower() }}">{{ incident['status'] }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>No active incidents yet.</p>
+                {% endif %}
+            </div>
+
+            <div class="panel-card">
+                <h3>My Recent Reports</h3>
+                {% if incidents %}
+                    <ul class="mini-list">
+                        {% for incident in incidents[:5] %}
+                            <li>{{ incident['emergency_type'] }} · {{ incident['city'] }} · {{ incident['created_at'] }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No recent reports.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <a href="{{ url_for('report_page') }}" class="primary-btn">Report Emergency</a>
+            <a href="{{ url_for('simulate_iot') }}?type=fire" class="secondary-btn">Simulate Emergency</a>
+        </div>
+    </section>
+</main>
+{% endblock %}

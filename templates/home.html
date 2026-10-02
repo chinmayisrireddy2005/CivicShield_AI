@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}CivicShield AI | Emergency Response{% endblock %}
+{% block content %}
+<main class="hero-section">
+    <section class="hero">
+        <div class="hero-copy">
+            <p class="eyebrow">Emergency Response Coordination</p>
+            <h1>Emergency Response, Connected in Seconds</h1>
+            <p class="subtitle">CivicShield AI transforms emergency reports and location information into a clear, location-aware response dashboard.</p>
+            <div class="hero-actions">
+                <a href="{{ url_for('report_page') }}" class="primary-btn">🚨 Report Emergency</a>
+                <a href="{{ url_for('incidents') }}" class="secondary-btn">View Dashboard</a>
+            </div>
+        </div>
+        <div class="hero-panel">
+            <div class="simulator-card">
+                <span class="simulator-label">DEMO / SIMULATION</span>
+                <h3>📡 IoT Emergency Simulator</h3>
+                <p>Generate simulated sensor signals for prototype demonstration.</p>
+                <form action="{{ url_for('simulate_iot') }}" method="get">
+                    <div class="sim-select-box">
+                        <label><input type="radio" name="type" value="fire" checked /> 🔥 Simulated Fire Sensor</label>
+                        <label><input type="radio" name="type" value="flood" /> 🌊 Simulated Flood Sensor</label>
+                        <label><input type="radio" name="type" value="accident" /> 🚗 Simulated Accident Sensor</label>
+                        <label><input type="radio" name="type" value="other" /> ⚠️ Simulated General Emergency</label>
+                    </div>
+                    <button type="submit" class="sim-btn">SIMULATE EMERGENCY</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-it-works" class="features-grid">
+        <div class="feature-card">
+            <span class="feature-icon">📍</span>
+            <h3>Location aware</h3>
+            <p>Map reports to the correct city, state, and route-aware response area.</p>
+        </div>
+        <div class="feature-card">
+            <span class="feature-icon">🧠</span>
+            <h3>AI brief</h3>
+            <p>Summarize risk, likely responders, and key immediate considerations.</p>
+        </div>
+        <div class="feature-card">
+            <span class="feature-icon">🗺️</span>
+            <h3>Live resources</h3>
+            <p>Surface real hospitals, police stations, fire services, and ambulances.</p>
+        </div>
+    </section>
+</main>
+{% endblock %}

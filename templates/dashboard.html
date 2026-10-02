@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% block title %}Incident Dashboard | CivicShield AI{% endblock %}
+{% block content %}
+<main class="page-content dashboard-page">
+    <div class="dashboard-header">
+        <div>
+            <p class="eyebrow">Emergency Command Center</p>
+            <h1>🚨 Incident {{ incident['id'] }}</h1>
+        </div>
+        <div class="header-actions">
+            <span class="status-badge {{ incident['status'].lower() }}">{{ incident['status'] }}</span>
+            {% if incident['status'] != 'RESOLVED' %}
+                <form method="post" action="{{ url_for('incident_resolve', incident_id=incident['id']) }}" onsubmit="return confirm('Resolve this incident?');">
+                    <button type="submit" class="primary-btn danger-btn">✓ RESOLVE INCIDENT</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="dashboard-layout">
+        <aside class="dashboard-left">
+            <div class="panel-card info-card">
+                <h3>Incident Information</h3>
+                <div class="incident-meta">
+                    <p><strong>Emergency type:</strong> {{ incident['emergency_type'] }}</p>
+                    <p><strong>Location:</strong> {{ incident['address'] }}</p>
+                    <p><strong>City:</strong> {{ incident['city'] }}</p>
+                    <p><strong>State:</strong> {{ incident['state'] }}</p>
+                    <p><strong>Severity:</strong> {{ incident['severity'] }}</p>
+                    <p><strong>Source:</strong> {{ incident['source'] }}</p>
+                    <p><strong>Reported time:</strong> {{ incident['created_at'] }}</p>
+                    <p><strong>Status:</strong> {{ incident['status'] }}</p>
+                    <p><strong>Incident ID:</strong> {{ incident['id'] }}</p>
+                </div>
+            </div>
+
+            {% if incident.get('photo_path') %}
+                <div class="panel-card incident-photo-card">
+                    <h3>Emergency Photo</h3>
+                    <a href="{{ url_for('incident_photo', filename=incident['photo_path']) }}" target="_blank" rel="noopener">
+                        <img src="{{ url_for('incident_photo', filename=incident['photo_path']) }}" alt="Photo attached to incident {{ incident['id'] }}" />
+                    </a>
+                </div>
+            {% endif %}
+
+            <div class="panel-card ai-card">
+                <h3>🧠 AI Situation Brief</h3>
+                {% set ai = incident['ai_analysis'] or {} %}
+                <p><strong>Situation summary:</strong> {{ ai.get('situation_summary', 'AI analysis unavailable.') }}</p>
+                <p><strong>Risk level:</strong> {{ ai.get('risk_level', 'Moderate') }}</p>
+                <p><strong>Likely support required:</strong> {{ ', '.join(ai.get('likely_support_needed', [])) if ai.get('likely_support_needed') else 'Information unavailable' }}</p>
+                <p><strong>Immediate considerations:</strong> {{ ', '.join(ai.get('immediate_considerations', [])) if ai.get('immediate_considerations') else 'Information unavailable' }}</p>
+                {% if incident['emergency_type'] == 'FLOOD' %}
+                    <p><strong>AI-estimated flood severity:</strong> {{ ai.get('flood_severity', 'Moderate') }}</p>
+                {% endif %}
+                <div class="alert-box">⚠️ AI assessment — human verification required.</div>
+            </div>
+
+            <div class="panel-card response-card">
+                <h3>RESPONSE READINESS</h3>
+                <ul class="readiness-list">
+                    <li>🏥 Medical Support — <span id="medical-support-status">Checking nearby resources</span></li>
+                    <li>👮 Police Support — <span id="police-support-status">Checking nearby resources</span></li>
+                    {% if 'FIRE' in incident['emergency_type'] %}
+                        <li>🔥 Fire Support — <span id="fire-support-status">Checking nearby resources</span></li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <div class="panel-card why-card">
+                <h3>Why these resources?</h3>
+                <ul>
+                    <li>🏥 Hospital — Relevant because medical assistance may be required.</li>
+                    <li>👮 Police — Relevant for public safety / traffic management.</li>
+                    {% if 'FIRE' in incident['emergency_type'] %}
+                        <li>🔥 Fire Station — Nearby fire response contact.</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </aside>
+
+        <section class="dashboard-right">
+            <div class="panel-card map-card">
+                <h3>Incident + Live Map</h3>
+                <div id="incident-map" data-incident-id="{{ incident['id'] }}" class="incident-map" data-lat="{{ incident['latitude'] or 0 }}" data-lon="{{ incident['longitude'] or 0 }}"></div>
+            </div>
+        </section>
+    </div>
+
+    <section class="resource-section panel-card">
+        <h3>Nearby Hospitals, Police Stations{% if 'FIRE' in incident['emergency_type'] %}, and Fire Stations{% endif %}</h3>
+        <div id="resource-list" class="resource-list"></div>
+    </section>
+
+    <section class="panel-card route-section">
+        <h3>Route Information</h3>
+        <div id="route-info">Select a nearby resource to view route distance and travel time.</div>
+    </section>
+
+    <section class="panel-card timeline-card">
+        <h3>Incident Timeline</h3>
+        <div class="timeline">
+            {% for event in incident['timeline'] %}
+                <div class="timeline-item">
+                    <span class="timeline-dot"></span>
+                    <div>
+                        <strong>{{ event['event'] }}</strong>
+                        <small>{{ event['created_at'] }}</small>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="panel-card verification-card">
+        <h3>Human Verification</h3>
+        <form action="{{ url_for('incident_update', incident_id=incident['id']) }}" method="post" class="update-form">
+            <label>
+                Update situation
+                <textarea name="update_details" rows="4" placeholder="Enter new information...">Fire has spread to the adjacent building.</textarea>
+            </label>
+            <div class="verify-actions">
+                <button type="submit" class="primary-btn">🔄 UPDATE SITUATION</button>
+            </div>
+        </form>
+        <div class="verification-box">
+            <p>AI assessment — human verification required.</p>
+            <p>Previous risk: {{ incident['severity'] }}</p>
+            <p>Updated risk will be generated after operator review.</p>
+        </div>
+    </section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const incidentMap = document.getElementById('incident-map');
+        const payload = {
+            incidentId: incidentMap.dataset.incidentId,
+            lat: parseFloat(incidentMap.dataset.lat || 0),
+            lon: parseFloat(incidentMap.dataset.lon || 0),
+            emergencyType: {{ incident['emergency_type']|tojson }}
+        };
+        if (window.initIncidentDashboard) {
+            window.initIncidentDashboard(payload);
+        }
+    });
+</script>
+{% endblock %}

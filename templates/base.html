@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}CivicShield AI{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}" />
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="page-shell">
+        <header class="topbar">
+            <div class="brand-block">
+                <span class="brand-icon">🛡️</span>
+                <span>CivicShield AI</span>
+            </div>
+            <nav class="main-nav">
+                <a href="{{ url_for('home') }}" class="nav-link {% if current_page == 'home' %}active{% endif %}">Home</a>
+                <a href="#how-it-works" class="nav-link">How It Works</a>
+                <a href="{{ url_for('user_dashboard') }}" class="nav-link {% if current_page == 'dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="{{ url_for('incidents') }}" class="nav-link {% if current_page == 'incidents' %}active{% endif %}">Incident History</a>
+                <a href="{{ url_for('login') }}" class="nav-link {% if current_page == 'login' %}active{% endif %}">Login</a>
+                <a href="{{ url_for('report_page') }}" class="nav-link cta-link">Report Emergency</a>
+            </nav>
+        </header>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-stack">
+                    {% for message in messages %}
+                        <div class="flash-message">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

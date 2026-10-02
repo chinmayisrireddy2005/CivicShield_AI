@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Incident History | CivicShield AI{% endblock %}
+{% block content %}
+<main class="page-content">
+    <section class="page-head">
+        <div>
+            <p class="eyebrow">Response Archive</p>
+            <h1>Incident History</h1>
+        </div>
+    </section>
+
+    <section class="filter-bar">
+        <select id="filter-type"><option value="">Emergency Type</option><option>FIRE</option><option>ROAD_ACCIDENT</option><option>FLOOD</option><option>OTHER_EMERGENCY</option></select>
+        <select id="filter-severity"><option value="">Severity</option><option>Low</option><option>Moderate</option><option>High</option><option>Critical</option></select>
+        <select id="filter-status"><option value="">Status</option><option>ACTIVE</option><option>VERIFIED</option><option>RESOLVED</option></select>
+        <input type="date" id="filter-date" />
+    </section>
+
+    <section class="table-card">
+        <table class="incident-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Type</th>
+                    <th>Location</th>
+                    <th>Severity</th>
+                    <th>Status</th>
+                    <th>Source</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for incident in incidents %}
+                <tr>
+                    <td>{{ incident['id'] }}</td>
+                    <td>{{ incident['emergency_type'] }}</td>
+                    <td>{{ incident['city'] }}, {{ incident['state'] }}</td>
+                    <td>{{ incident['severity'] }}</td>
+                    <td><span class="status-badge {{ incident['status'].lower() }}">{{ incident['status'] }}</span></td>
+                    <td>{{ incident['source'] }}</td>
+                    <td>{{ incident['created_at'] }}</td>
+                    <td>
+                        <div class="action-links">
+                            <a href="{{ url_for('dashboard', incident_id=incident['id']) }}">View</a>
+                            <a href="{{ url_for('dashboard', incident_id=incident['id']) }}">Update</a>
+                            <form method="post" action="{{ url_for('incident_resolve', incident_id=incident['id']) }}" onsubmit="return confirm('Resolve this incident?');">
+                                <button type="submit">Resolve</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</main>
+{% endblock %}
